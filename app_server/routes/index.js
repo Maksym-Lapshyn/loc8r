@@ -1,8 +1,12 @@
 var express = require('express');
 var router = express.Router();
-var mainController = require('../controllers/main.js');
+var locationsController = require('../controllers/locations');
+var othersController = require('../controllers/others');
 
-/* GET home page. */
-router.get('/', mainController.index);
+router.get('/', locationsController.homeList);
+router.get('/location', locationsController.locationInfo);
+router.get('/location/review/new', locationsController.newReview);
+
+router.get('/about', othersController.about);
 
 module.exports = router;
