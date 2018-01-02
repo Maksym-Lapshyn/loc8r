@@ -2,7 +2,13 @@ var mongoose = require('mongoose');
 require('./locations');
 
 var dbUri = 'mongodb://localhost/Loc8r';
-var shutdown;
+
+var shutdown = function(msg, callback){
+    mongoose.connection.close(() => {
+        console.log('Mongoose disconnected through ' + msg);
+        callback();
+    });
+};
 
 mongoose.connect(dbUri, {
     useMongoClient: true
@@ -19,13 +25,6 @@ mongoose.connection.on('error', err => {
 mongoose.connection.on('disconnected', () => {
     console.log('Mongoose disconnected');
 });
-
-shutdown = function(msg, callback){
-    mongoose.connection.close(() => {
-        console.log('Mongoose disconnected through ' + msg);
-        callback();
-    });
-};
 
 process.once('SIGUSR2', () => {
     shutdown('Nodemon restart', () => {
