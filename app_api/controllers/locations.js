@@ -9,7 +9,6 @@ module.exports.getLocationListByDistance = function (req, res) {
     sendJsonResponse(res, 404, {
       "message": "lng and lat query paramaters are required"
     });
-
     return;
   }
 
@@ -110,17 +109,49 @@ module.exports.createLocation = function (req, res) {
 };
 
 module.exports.updateLocation = function (req, res) {
-  res.status(200);
-  res.json({
-    "status": "success"
-  });
+  locationModel
+    .findById(req.params.locationId)
+    .exec(function (err, location) {
+      if (!location) {
+        sendJsonResponse(res, 404, {
+          "message": "Location not found"
+        });
+        return;
+      } else if (err) {
+        sendJsonResponse(res, 404, err);
+        return;
+      }
+      location.name = req.body.name;
+      location.address = req.body.address;
+      location.facilities = req.body.facilities.split(",")
+      location.coords = [parseFloat(req.body.lng), parseFloat(req.body.lat)];
+      location.openingTimes = getOpeningTimes(res);
+      location.save(function (err, location) {
+        if (err) {
+          sendJsonResponse(res, 404, err);
+        } else {
+          sendJsonResponse(res, 200, location);
+        }
+      });
+    });
 };
 
 module.exports.deleteLocation = function (req, res) {
-  res.status(200);
-  res.json({
-    "status": "success"
-  });
+  if (req.params.locationId) {
+    locationModel
+      .findByIdAndRemove(locationId)
+      .exec(function (err, location) {
+        if (err) {
+          sendJsonResponse(res, 404, err);
+        } else {
+          sendJsonResponse(res, 204, null);
+        }
+      });
+  } else {
+    sendJsonResponse(res, 404, {
+      "message": "LocationId is not specified"
+    });
+  }
 };
 
 var sendJsonResponse = function (res, status, content) {

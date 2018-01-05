@@ -1,30 +1,54 @@
-module.exports.homeList = function (req, res) {
+var request = require("request");
+var apiOptions = {
+  server: "http://localhost:3000"
+};
+if (process.env.NODE_ENV === "production") {
+  apiOptions.server = "someserver"//CHANGE ME
+}
+
+var renderHomePage = function (req, res, responseBody) {
   res.render('locations-list', {
-    title: 'Loc8r - find a place to work with Wi-Fi',
+    title: 'Loc8r - find a place to work with wifi',
     pageHeader: {
       title: 'Loc8r',
       strapline: 'Find places to work with wifi near you!'
     },
     sidebar: "Looking for wifi and a seat? Loc8r helps you find places to work when out and about. Perhaps with coffee, cake or a pint? Let Loc8r help you find the place you're looking for.",
-    locations: [{
-      name: 'Starcups',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 3,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '100m'
-    }, {
-      name: 'Cafe Hero',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 4,
-      facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-      distance: '200m'
-    }, {
-      name: 'Burger Queen',
-      address: '125 High Street, Reading, RG6 1PS',
-      rating: 2,
-      facilities: ['Food', 'Premium wifi'],
-      distance: '250m'
-    }]
+    locations: responseBody
+  });
+};
+
+var _formatDistance = function (distance) {
+  var numDistance, unit;
+  if (distance > 1) {
+    numDistance = parseFloat(distance).toFixed(1);
+    unit = 'km';
+  } else {
+    numDistance = parseInt(distance * 1000, 10);
+    unit = 'm';
+  }
+  return numDistance + unit;
+};
+
+module.exports.homeList = function (req, res) {
+  var requestOptions = {
+    url: apiOptions.server + "/api/locations",
+    method: "GET",
+    json: {},
+    qs: {
+      lng: -0.7992599,
+      lat: 51.378091,
+      maxDistance: 20
+    }
+  };
+
+  request(requestOptions, function (err, response, body) {
+    if (response.statusCode === 200 && data.length){
+      for (var i = 0; i < body.length; i++) {
+        body[i].distance = formatDistance(data[i].distance);
+      }
+      renderHomePage(err, response, body);
+    }
   });
 };
 
@@ -45,7 +69,8 @@ module.exports.locationInfo = function (req, res) {
       facilities: ['Hot drinks', 'Food', 'Premium wifi'],
       coords: {
         lat: 51.455041,
-        lng: -0.9690884 },
+        lng: -0.9690884
+      },
       openingTimes: [{
         days: 'Monday - Friday',
         opening: '7:00am',
@@ -76,10 +101,10 @@ module.exports.locationInfo = function (req, res) {
 };
 
 module.exports.newReview = function (req, res) {
-  res.render('location-review-form', { 
+  res.render('location-review-form', {
     title: 'Review Starcups on Loc8r',
     pageHeader: {
-      title: 'Review Starcups' 
+      title: 'Review Starcups'
     }
   });
 };
