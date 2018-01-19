@@ -6,7 +6,22 @@ if (process.env.NODE_ENV === "production") {
   apiOptions.server = "someserver"//CHANGE ME
 }
 
-var renderHomePage = function (req, res, responseBody) {
+module.exports.homeList = function (req, res) {
+  renderHomepage(req, res);
+};
+
+var renderHomepage = function (req, res) {
+  res.render('locations-list', {
+    title: 'Loc8r - find a place to work with wifi',
+    pageHeader: {
+      title: 'Loc8r',
+      strapline: 'Find places to work with wifi near you!'
+    },
+    sidebar: "Looking for wifi and a seat? Loc8r helps you find places to work when out and about. Perhaps with coffee, cake or a pint? Let Loc8r help you find the place you're looking for."
+  });
+};
+
+/*var renderHomePage = function (req, res, responseBody) {
   res.render('locations-list', {
     title: 'Loc8r - find a place to work with wifi',
     pageHeader: {
@@ -107,4 +122,4 @@ module.exports.newReview = function (req, res) {
       title: 'Review Starcups'
     }
   });
-};
+};*/
