@@ -1,27 +1,37 @@
 angular
-    .module('loc8rApp', [])
-    .controller('locationListController', locationListController)
-    .filter('formatDistanceFilter', formatDistanceFilter)
-    .directive('starRatingDirective', starRatingDirective);
+    .module('loc8rApp', []);
 
-var locationListController = function ($scope) {
-    $scope.data = {
-        locations: [{
-            name: 'Burger Queen',
-            address: '125 High Street, Reading, RG6 1PS',
-            rating: 3,
-            facilities: ['Hot drinks', 'Food', 'Premium wifi'],
-            distance: '0.296456',
-            _id: '5370a35f2536f6785f8dfb6a'
-        }, {
-            name: 'Costy',
-            address: '125 High Street, Reading, RG6 1PS',
-            rating: 5,
-            facilities: ['Hot drinks', 'Food', 'Alcoholic drinks'],
-            distance: '0.7865456',
-            _id: '5370a35f2536f6785f8dfb6a'
-        }]
+var locationDataService = function ($http) {
+    return {
+        getLocations: function () {
+            return $http.get('/api/locations?lng=-0.79&lat=51.3&maxDistance=20');
+        }
     };
+};
+
+var geoLocationService = function () {
+    var getPosition = function (successCallback, errorCallback, noGeoCallback) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(successCallback, errorCallback);
+        } else {
+            noGeoCallback();
+        }
+    };
+
+    return {
+        getPosition: getPosition
+    };
+};
+
+var locationListController = function ($scope, locationDataService, geoLocationService) {
+    $scope.message = "some message";
+    locationDataService.getLocations()
+        .success(function (data) {
+            $scope.locations = data;
+        })
+        .error(function (error) {
+            $scope.message = error;
+        });
 };
 
 var formatDistanceFilter = function () {
@@ -42,7 +52,7 @@ var formatDistanceFilter = function () {
     };
 };
 
-var starRatingDirective = function() {
+var starRatingDirective = function () {
     return {
         scope: {
             thisRating: '=rating'
@@ -53,4 +63,12 @@ var starRatingDirective = function() {
 
 var _isNumeric = function (n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
-}; 
+};
+
+angular
+    .module('loc8rApp')
+    .controller('locationListController', locationListController)
+    .filter('formatDistanceFilter', formatDistanceFilter)
+    .directive('starRatingDirective', starRatingDirective)
+    .service('locationDataService', locationDataService)
+    .service('geoLocationService', geoLocationService);
